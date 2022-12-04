@@ -2,6 +2,7 @@
 <?php include "includes/navigation.php" ?>
 
 <?php
+$user_role = $_SESSION['user_role'];
 $userArray = [];
 $userData = readTable($connection, "users");
 foreach ($userData as $userDataRow) {
@@ -18,6 +19,8 @@ if (isset($_GET['c-id'])) {
     $cId = $_GET['c-id'];
 
     $posts = fetchPostsByCategory($connection, $cId);
+} else {
+    header("Location: index.php");
 }
 ?>
 
@@ -37,7 +40,7 @@ if (isset($_GET['c-id'])) {
             <!-- First Blog Post -->
             <?php
             foreach ($posts as $postRow) {
-                if ($postRow['post_status'] == "published") {
+                if (shouldShowPost($postRow['post_status'], $user_role)) {
                     $postExists = true;
             ?>
                     <h2>

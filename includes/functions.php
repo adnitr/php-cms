@@ -32,6 +32,17 @@ function readTableLimited($connection, $tableName, $val1, $val2)
     return $retarr;
 }
 
+function readTableConditionLimited($connection, $tableName, $colName, $colVal, $val1, $val2)
+{
+    $query = "SELECT * FROM $tableName WHERE $colName = '$colVal' LIMIT $val1, $val2";
+    $retarr = [];
+    $data = mysqli_query($connection, $query);
+    while ($row = mysqli_fetch_assoc($data)) {
+        array_push($retarr, $row);
+    }
+    return $retarr;
+}
+
 function hashPassword($pass)
 {
     // return crypt($pass, '$2y$10$iusesomecrazystrings22$');
@@ -518,3 +529,16 @@ function countUsersOnline()
 }
 
 countUsersOnline();
+
+function shouldShowPost($post_status, $user_role)
+{
+    if ($user_role === 'admin') {
+        return true;
+    } else {
+        if ($post_status === 'published') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}

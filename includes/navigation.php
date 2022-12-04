@@ -5,6 +5,8 @@
 
 <?php
 $categories = readTable($connection, "categories");
+
+$pageName = basename($_SERVER['PHP_SELF']);
 ?>
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
@@ -25,12 +27,27 @@ $categories = readTable($connection, "categories");
                 foreach ($categories as $catRow) {
                     $catTitle = $catRow['cat_title'];
                     $catId = $catRow['cat_id'];
-                    echo '<li><a href="category.php?c-id=' . $catId . '">' . $catTitle . '</a></li>';
+                    if (isset($_GET['c-id']) && $_GET['c-id'] == $catId) {
+                        echo '<li class="active"><a href="category.php?c-id=' . $catId . '">' . $catTitle . '</a></li>';
+                    } else {
+                        echo '<li><a href="category.php?c-id=' . $catId . '">' . $catTitle . '</a></li>';
+                    }
+                }
+
+                if ($pageName === 'registration.php') {
+                    echo '<li><a href="contact.php">Contact</a></li>
+                    <li class="active"><a href="registration.php">Register</a></li>';
+                } else if ($pageName === 'contact.php') {
+                    echo '<li class="active"><a href="contact.php">Contact</a></li>
+                    <li><a href="registration.php">Register</a></li>';
+                } else {
+                    echo '<li><a href="contact.php">Contact</a></li>
+                    <li><a href="registration.php">Register</a></li>';
                 }
                 ?>
+
                 <li><a href="admin">Admin</a></li>
-                <li><a href="contact.php">Contact</a></li>
-                <li><a href="registration.php">Register</a></li>
+
                 <?php
                 if (isset($_SESSION['user_role'])) {
                     if ($_SESSION['user_role'] === 'admin') {

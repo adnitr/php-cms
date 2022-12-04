@@ -2,6 +2,7 @@
 <?php include "includes/navigation.php" ?>
 
 <?php
+$user_role = $_SESSION['user_role'];
 $userArray = [];
 $userData = readTable($connection, "users");
 foreach ($userData as $userDataRow) {
@@ -17,6 +18,8 @@ if (isset($_GET['author'])) {
     while ($row = mysqli_fetch_assoc($results)) {
         array_push($posts, $row);
     }
+} else {
+    header("Location: index.php");
 }
 
 $postExists = false;
@@ -52,7 +55,7 @@ if (isset($_POST['search'])) {
             <!-- First Blog Post -->
             <?php
             foreach ($posts as $postRow) {
-                if ($postRow['post_status'] === 'published') {
+                if (shouldShowPost($postRow['post_status'], $user_role)) {
                     $postExists = true;
             ?>
                     <h2>

@@ -9,6 +9,7 @@ $noOfPosts = 0;
 $postExists = false;
 $isSearch = false;
 $search = '';
+$user_role = $_SESSION['user_role'];
 
 $userArray = [];
 $userData = readTable($connection, "users");
@@ -30,7 +31,12 @@ if (isset($_POST['search']) || isset($_GET['search'])) {
         $search = $_GET['search'];
     }
     $isSearch = true;
-    $query = "SELECT * FROM posts WHERE post_tags LIKE '%$search%'";
+
+    if ($user_role === 'admin') {
+        $query = "SELECT * FROM posts WHERE post_tags LIKE '%$search%'";
+    } else {
+        $query = "SELECT * FROM posts WHERE post_tags LIKE '%$search%' AND post_status = 'published'";
+    }
 
     $posts = mysqli_query($connection, $query);
     $postsarr = [];
@@ -46,9 +52,15 @@ if (isset($_POST['search']) || isset($_GET['search'])) {
         $posts = array_slice($postsarr, $val1, $postsPerPage);
     }
 } else {
-    $noOfPosts = countRowsInTable($connection, "posts");
-    $noOfPages = ceil($noOfPosts / $postsPerPage);
-    $posts = readTableLimited($connection, "posts", $val1, $postsPerPage);
+    if ($user_role === 'admin') {
+        $noOfPosts = countRowsInTable($connection, "posts");
+        $noOfPages = ceil($noOfPosts / $postsPerPage);
+        $posts = readTableLimited($connection, "posts", $val1, $postsPerPage);
+    } else {
+        $noOfPosts = countRowsByColVal($connection, "posts", "post_status", "published");
+        $noOfPages = ceil($noOfPosts / $postsPerPage);
+        $posts = readTableConditionLimited($connection, "posts", "post_status", "published", $val1, $postsPerPage);
+    }
 }
 ?>
 
@@ -75,25 +87,22 @@ if (isset($_POST['search']) || isset($_GET['search'])) {
             <!-- First Blog Post -->
             <?php
             foreach ($posts as $postRow) {
-                if ($postRow['post_status'] === 'published') {
-                    $postExists = true;
+                $postExists = true;
             ?>
-                    <h2>
-                        <a href="post.php?p-id=<?php echo $postRow['post_id'] ?>"><?php echo $postRow['post_title'] ?></a>
-                    </h2>
-                    <p class="lead">
-                        by <a href="author_posts.php?author=<?php echo $postRow['post_author'] ?>"><?php echo $userArray[$postRow['post_author']]; ?></a>
-                    </p>
-                    <p><span class="glyphicon glyphicon-time"></span> Posted on <?php echo $postRow['post_date'] ?></p>
-                    <hr>
-                    <a href="post.php?p-id=<?php echo $postRow['post_id'] ?>"><img class="img-responsive" src="images/<?php echo $postRow['post_img'] ?>" alt="post-image"></a>
+                <h2>
+                    <a href="post.php?p-id=<?php echo $postRow['post_id'] ?>"><?php echo $postRow['post_title'] ?></a>
+                </h2>
+                <p class="lead">
+                    by <a href="author_posts.php?author=<?php echo $postRow['post_author'] ?>"><?php echo $userArray[$postRow['post_author']]; ?></a>
+                </p>
+                <p><span class="glyphicon glyphicon-time"></span> Posted on <?php echo $postRow['post_date'] ?></p>
+                <hr>
+                <a href="post.php?p-id=<?php echo $postRow['post_id'] ?>"><img class="img-responsive" src="images/<?php echo $postRow['post_img'] ?>" alt="post-image"></a>
 
-                    <hr>
-                    <p><?php echo substring(strip_tags($postRow['post_content'])); ?></p>
-                    <a class="btn btn-primary" href="post.php?p-id=<?php echo $postRow['post_id'] ?>">Read More <span class="glyphicon glyphicon-chevron-right"></span></a>
-                    <hr>
-
-                <?php } ?>
+                <hr>
+                <p><?php echo substring(strip_tags($postRow['post_content'])); ?></p>
+                <a class="btn btn-primary" href="post.php?p-id=<?php echo $postRow['post_id'] ?>">Read More <span class="glyphicon glyphicon-chevron-right"></span></a>
+                <hr>
             <?php }
             if (!$postExists) {
                 echo '<h1>No post to display!</h1>';

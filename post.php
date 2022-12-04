@@ -3,6 +3,7 @@
 
 <?php
 $postData = '';
+$user_role = $_SESSION['user_role'];
 $userArray = [];
 $userData = readTable($connection, "users");
 foreach ($userData as $userDataRow) {
@@ -46,7 +47,7 @@ if (isset($_POST['create_comment']) && isset($_POST['comment_author']) && isset(
         <!-- Blog Entries Column -->
         <div class="col-md-8">
             <?php
-            if (isset($postData['post_status']) && $postData['post_status'] === 'published') {
+            if (isset($postData['post_status']) && shouldShowPost($postData['post_status'], $user_role)) {
                 incPostView($connection, $postId);
             ?>
 
