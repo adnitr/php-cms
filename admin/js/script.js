@@ -5,6 +5,16 @@ $(document).ready(function () {
     });
   }
 
+  $(".delete_link").on("click", function () {
+    var id = $(this).attr("rel");
+
+    let delete_url = "posts.php?delete=" + id;
+
+    $(".modal-delete-link").attr("href", delete_url);
+
+    $("#myModal").modal("show");
+  });
+
   setInterval(function () {
     loadUsersOnline();
   }, 500);

@@ -48,7 +48,7 @@ if (isset($_POST['submit']) && $_SESSION['user_role'] === 'admin' && isset($_POS
 
 <form action="" method="POST">
     <table class="table table-bordered table-hover">
-
+        <?php include "modal.php"; ?>
         <div id="bulkOptionContainer" class="col-xs-4">
             <select name="bulkAction" id="bulkAction" class="form-control">
                 <option value="">Select Option</option>
@@ -98,7 +98,8 @@ if (isset($_POST['submit']) && $_SESSION['user_role'] === 'admin' && isset($_POS
                     <td><?php echo $postDataRow['post_views_count']; ?></td>
                     <td><a href="comments.php?p-id=<?php echo $postDataRow['post_id']; ?>"><?php echo $postDataRow['post_comment_count']; ?></a></td>
                     <td><a href="posts.php?source=edit_post&edit=<?php echo $postDataRow['post_id']; ?>">Edit</a></td>
-                    <td><a onclick="javascript: return confirm('Are you sure you want to delete this post?');" href="?delete=<?php echo $postDataRow['post_id']; ?>">Delete</a></td>
+                    <!-- <td><a onclick="javascript: return confirm('Are you sure you want to delete this post?');" href="?delete=<?php echo $postDataRow['post_id']; ?>">Delete</a></td> -->
+                    <td><a class="delete_link" rel="<?php echo $postDataRow['post_id']; ?>" href="javascript:void(0)">Delete</a></td>
                 </tr>
             <?php } ?>
         </tbody>
