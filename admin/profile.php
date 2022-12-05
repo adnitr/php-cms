@@ -30,16 +30,24 @@ if (isset($_POST['edit_user_individual']) && $_SESSION['user_role'] === 'admin' 
         $editUserData['last_name'] = $last_name;
         $editUserData['email'] = $email;
         $editUserData['password'] = $password;
-        $editStatus = editProfile($connection, $editUserData);
-        if ($editStatus) {
-            displayAlert("success", "User Edited Successfully!");
-            $updatedUserData = getRowById($connection, "users", "user_id", $_SESSION['user_id']);
-            $_SESSION['username'] = $updatedUserData['username'];
-            $_SESSION['first_name'] = $updatedUserData['first_name'];
-            $_SESSION['last_name'] = $updatedUserData['last_name'];
-            $_SESSION['email'] = $updatedUserData['email'];
+        if (isDuplicate($connection, "users", "username", $username)) {
+            displayAlert("danger", "Username already exists");
         } else {
-            displayAlert("danger", "Something went wrong, user could not be edited!");
+            if (isDuplicate($connection, "users", "email", $email)) {
+                displayAlert("danger", "Email already exists");
+            } else {
+                $editStatus = editProfile($connection, $editUserData);
+                if ($editStatus) {
+                    displayAlert("success", "User Edited Successfully!");
+                    $updatedUserData = getRowById($connection, "users", "user_id", $_SESSION['user_id']);
+                    $_SESSION['username'] = $updatedUserData['username'];
+                    $_SESSION['first_name'] = $updatedUserData['first_name'];
+                    $_SESSION['last_name'] = $updatedUserData['last_name'];
+                    $_SESSION['email'] = $updatedUserData['email'];
+                } else {
+                    displayAlert("danger", "Something went wrong, user could not be edited!");
+                }
+            }
         }
     }
 }

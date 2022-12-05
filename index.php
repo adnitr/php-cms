@@ -9,14 +9,7 @@ $noOfPosts = 0;
 $postExists = false;
 $isSearch = false;
 $search = '';
-$user_role = $_SESSION['user_role'];
-
-$userArray = [];
-$userData = readTable($connection, "users");
-foreach ($userData as $userDataRow) {
-    $name = $userDataRow['first_name'] . " " . $userDataRow['last_name'];
-    $userArray[$userDataRow['user_id']] = $name;
-}
+$user_role = checkAdmin();
 
 if (isset($_GET['page'])) {
     $pageNo = $_GET['page'];
@@ -33,33 +26,29 @@ if (isset($_POST['search']) || isset($_GET['search'])) {
     $isSearch = true;
 
     if ($user_role === 'admin') {
-        $query = "SELECT * FROM posts WHERE post_tags LIKE '%$search%'";
+        $query = "SELECT * FROM posts LEFT JOIN users ON post_author = user_id WHERE post_tags LIKE '%$search%'";
     } else {
-        $query = "SELECT * FROM posts WHERE post_tags LIKE '%$search%' AND post_status = 'published'";
+        $query = "SELECT * FROM posts LEFT JOIN users ON post_author = user_id WHERE post_tags LIKE '%$search%' AND post_status = 'published'";
     }
 
-    $posts = mysqli_query($connection, $query);
-    $postsarr = [];
-    while ($row = mysqli_fetch_assoc($posts)) {
-        array_push($postsarr, $row);
-    }
-
-    if (!$posts) {
-        die('QUERY FAILED!' . mysqli_error($connection));
-    } else {
-        $noOfPosts = mysqli_num_rows($posts);
-        $noOfPages = ceil($noOfPosts / $postsPerPage);
-        $posts = array_slice($postsarr, $val1, $postsPerPage);
-    }
+    $data = mysqli_query($connection, $query);
+    $posts = generateArray($data);
+    $noOfPosts = count($posts);
+    $noOfPages = ceil($noOfPosts / $postsPerPage);
+    $posts = array_slice($posts, $val1, $postsPerPage);
 } else {
     if ($user_role === 'admin') {
         $noOfPosts = countRowsInTable($connection, "posts");
         $noOfPages = ceil($noOfPosts / $postsPerPage);
-        $posts = readTableLimited($connection, "posts", $val1, $postsPerPage);
+        $query = "SELECT * FROM posts LEFT JOIN users ON post_author = user_id LIMIT $val1, $postsPerPage";
+        $data = mysqli_query($connection, $query);
+        $posts = generateArray($data);
     } else {
         $noOfPosts = countRowsByColVal($connection, "posts", "post_status", "published");
         $noOfPages = ceil($noOfPosts / $postsPerPage);
-        $posts = readTableConditionLimited($connection, "posts", "post_status", "published", $val1, $postsPerPage);
+        $query = "SELECT * FROM posts LEFT JOIN users ON post_author = user_id WHERE post_status = 'published' LIMIT $val1, $postsPerPage";
+        $data = mysqli_query($connection, $query);
+        $posts = generateArray($data);
     }
 }
 ?>
@@ -93,7 +82,7 @@ if (isset($_POST['search']) || isset($_GET['search'])) {
                     <a href="post.php?p-id=<?php echo $postRow['post_id'] ?>"><?php echo $postRow['post_title'] ?></a>
                 </h2>
                 <p class="lead">
-                    by <a href="author_posts.php?author=<?php echo $postRow['post_author'] ?>"><?php echo $userArray[$postRow['post_author']]; ?></a>
+                    by <a href="author_posts.php?author=<?php echo $postRow['post_author'] ?>"><?php echo $postRow['first_name'] . " ", $postRow['last_name']; ?></a>
                 </p>
                 <p><span class="glyphicon glyphicon-time"></span> Posted on <?php echo $postRow['post_date'] ?></p>
                 <hr>

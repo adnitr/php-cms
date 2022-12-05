@@ -38,7 +38,11 @@
     <!-- Login -->
     <div class="well">
         <?php
-        $user_id_session = $_SESSION['user_id'];
+        $user_id_session = '';
+        if (isset($_SESSION['user_id'])) {
+
+            $user_id_session = $_SESSION['user_id'];
+        }
         if (!$user_id_session) { ?>
             <h4>Login</h4>
             <form action="includes/login.php" method="POST">

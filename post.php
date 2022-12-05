@@ -3,20 +3,16 @@
 
 <?php
 $postData = '';
-$user_role = $_SESSION['user_role'];
-$userArray = [];
-$userData = readTable($connection, "users");
-foreach ($userData as $userDataRow) {
-    $name = $userDataRow['first_name'] . " " . $userDataRow['last_name'];
-    $userArray[$userDataRow['user_id']] = $name;
-}
+$user_role = checkAdmin();
 ?>
 
 <?php
 $postId = 0;
 if (isset($_GET['p-id'])) {
     $postId = $_GET['p-id'];
-    $postData = getRowById($connection, "posts", "post_id", $postId);
+    $query = "SELECT * FROM posts LEFT JOIN users ON post_author = user_id WHERE post_id = $postId";
+    $data = mysqli_query($connection, $query);
+    $postData = mysqli_fetch_assoc($data);
 } else {
     header("Location: index.php");
 }
@@ -61,7 +57,7 @@ if (isset($_POST['create_comment']) && isset($_POST['comment_author']) && isset(
                     <?php echo $postData['post_title'] ?>
                 </h2>
                 <p class="lead">
-                    by <a href="author_posts.php?author=<?php echo $postData['post_author'] ?>"><?php echo $userArray[$postData['post_author']]; ?></a>
+                    by <a href="author_posts.php?author=<?php echo $postData['post_author'] ?>"><?php echo $postData['first_name'] . " " . $postData['last_name']; ?></a>
                 </p>
                 <p><span class="glyphicon glyphicon-time"></span> Posted on <?php echo $postData['post_date'] ?></p>
                 <hr>
