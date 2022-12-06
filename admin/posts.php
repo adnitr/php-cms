@@ -32,7 +32,7 @@ foreach ($userData as $userDataRow) {
                         <small>Author</small>
                     </h1>
                     <?php
-                    if (isset($_GET['delete']) && $_SESSION['user_role'] === 'admin') {
+                    if (isset($_GET['delete']) && isAuthorOfPost($postId)) {
                         $deleteId = $_GET['delete'];
                         $status = deletePost($connection, $deleteId);
                         if ($status) {

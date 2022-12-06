@@ -36,15 +36,11 @@ if (isset($_POST['submit']) && isset($_POST['username']) && isset($_POST['first_
             if (isDuplicate($connection, "users", "email", $email)) {
                 displayAlert("danger", "Email already exists");
             } else {
-                if (isDuplicate($connection, "users", "username", $username)) {
-                    displayAlert("danger", "Email already exists");
+                $status = createUser($connection, $newUser);
+                if ($status) {
+                    displayAlert("success", "Registration has been successful!");
                 } else {
-                    $status = createUser($connection, $newUser);
-                    if ($status) {
-                        displayAlert("success", "Registration has been successful!");
-                    } else {
-                        displayAlert("danger", "Something went wrong!");
-                    }
+                    displayAlert("danger", "Something went wrong!");
                 }
             }
         }

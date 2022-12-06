@@ -1,5 +1,5 @@
 <?php
-if (isset($_POST['submit']) && $_SESSION['user_role'] === 'admin' && isset($_POST['postCheckBox']) && isset($_POST['bulkAction'])) {
+if (isset($_POST['submit']) && $_SESSION['user_role'] && isset($_POST['postCheckBox']) && isset($_POST['bulkAction'])) {
     $action = $_POST['bulkAction'];
     $checkboxes = $_POST['postCheckBox'];
     if ($action === '') {
@@ -7,32 +7,40 @@ if (isset($_POST['submit']) && $_SESSION['user_role'] === 'admin' && isset($_POS
     } else {
         // echo $action;
         // print_r($checkboxes);
-        $modifyStatus = true;
+        $modifyStatus = false;
         foreach ($checkboxes as $checkboxId) {
-            if ($action === 'published' || $action === 'draft') {
+            if (($action === 'published' || $action === 'draft') && isAuthorOfPost($checkboxId)) {
                 $modStatus = modifyAField($connection, "posts", "post_id", $checkboxId, "post_status", $action);
                 if (!$modStatus) {
                     $modifyStatus = false;
+                } else {
+                    $modifyStatus = true;
                 }
             }
-            if ($action === 'delete') {
+            if ($action === 'delete' && isAuthorOfPost($checkboxId)) {
                 $modStatus = deletePost($connection, $checkboxId);
                 if (!$modStatus) {
                     $modifyStatus = false;
+                } else {
+                    $modifyStatus = true;
                 }
             }
 
-            if ($action === 'clone') {
+            if ($action === 'clone' && isAuthorOfPost($checkboxId)) {
                 $modStatus = clonePost($connection, $checkboxId);
                 if (!$modStatus) {
                     $modifyStatus = false;
+                } else {
+                    $modifyStatus = true;
                 }
             }
 
-            if ($action === 'view_reset') {
+            if ($action === 'view_reset' && isAuthorOfPost($checkboxId)) {
                 $modStatus = modifyAField($connection, "posts", "post_id", $checkboxId, "post_views_count", 0);
                 if (!$modStatus) {
                     $modifyStatus = false;
+                } else {
+                    $modifyStatus = true;
                 }
             }
         }
@@ -77,6 +85,7 @@ if (isset($_POST['submit']) && $_SESSION['user_role'] === 'admin' && isset($_POS
                 <th>Tags</th>
                 <th>Date</th>
                 <th>Views</th>
+                <th>Likes</th>
                 <th>Comments</th>
                 <th>Edit</th>
                 <th>Delete</th>
@@ -84,24 +93,28 @@ if (isset($_POST['submit']) && $_SESSION['user_role'] === 'admin' && isset($_POS
         </thead>
         <tbody>
             <?php
-            foreach ($postData as $postDataRow) { ?>
-                <tr>
-                    <td><input class="checkBoxes" type="checkbox" name="postCheckBox[]" value="<?php echo $postDataRow['post_id']; ?>"></td>
-                    <td><?php echo $postDataRow['post_id']; ?></td>
-                    <td><?php echo $userArray[$postDataRow['post_author']]; ?></td>
-                    <td><a href="../post.php?p-id=<?php echo $postDataRow['post_id']; ?>"><?php echo $postDataRow['post_title']; ?></a></td>
-                    <td><?php echo $catArray[$postDataRow['post_category_id']]; ?></td>
-                    <td><?php echo $postDataRow['post_status']; ?></td>
-                    <td> <img width="100" src="../images/<?php echo $postDataRow['post_img']; ?>" alt="post-img"></td>
-                    <td><?php echo $postDataRow['post_tags']; ?></td>
-                    <td><?php echo $postDataRow['post_date']; ?></td>
-                    <td><?php echo $postDataRow['post_views_count']; ?></td>
-                    <td><a href="comments.php?p-id=<?php echo $postDataRow['post_id']; ?>"><?php echo $postDataRow['post_comment_count']; ?></a></td>
-                    <td><a href="posts.php?source=edit_post&edit=<?php echo $postDataRow['post_id']; ?>">Edit</a></td>
-                    <!-- <td><a onclick="javascript: return confirm('Are you sure you want to delete this post?');" href="?delete=<?php echo $postDataRow['post_id']; ?>">Delete</a></td> -->
-                    <td><a class="delete_link" rel="<?php echo $postDataRow['post_id']; ?>" href="javascript:void(0)">Delete</a></td>
-                </tr>
-            <?php } ?>
+            foreach ($postData as $postDataRow) {
+                if (isAuthorOfPost($postDataRow['post_id']) || isAdmin()) {
+            ?>
+                    <tr>
+                        <td><input class="checkBoxes" type="checkbox" name="postCheckBox[]" value="<?php echo $postDataRow['post_id']; ?>"></td>
+                        <td><?php echo $postDataRow['post_id']; ?></td>
+                        <td><?php echo $userArray[$postDataRow['post_author']]; ?></td>
+                        <td><a href="../post.php?p-id=<?php echo $postDataRow['post_id']; ?>"><?php echo $postDataRow['post_title']; ?></a></td>
+                        <td><?php echo $catArray[$postDataRow['post_category_id']]; ?></td>
+                        <td><?php echo $postDataRow['post_status']; ?></td>
+                        <td> <img width="100" src="../images/<?php echo $postDataRow['post_img']; ?>" alt="post-img"></td>
+                        <td><?php echo $postDataRow['post_tags']; ?></td>
+                        <td><?php echo $postDataRow['post_date']; ?></td>
+                        <td><?php echo $postDataRow['post_views_count']; ?></td>
+                        <td><?php echo $postDataRow['post_likes']; ?></td>
+                        <td><a href="comments.php?p-id=<?php echo $postDataRow['post_id']; ?>"><?php echo $postDataRow['post_comment_count']; ?></a></td>
+                        <td><a href="posts.php?source=edit_post&edit=<?php echo $postDataRow['post_id']; ?>">Edit</a></td>
+                        <!-- <td><a onclick="javascript: return confirm('Are you sure you want to delete this post?');" href="?delete=<?php echo $postDataRow['post_id']; ?>">Delete</a></td> -->
+                        <td><a class="delete_link" rel="<?php echo $postDataRow['post_id']; ?>" href="javascript:void(0)">Delete</a></td>
+                    </tr>
+            <?php }
+            } ?>
         </tbody>
     </table>
 </form>

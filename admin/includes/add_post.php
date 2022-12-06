@@ -1,9 +1,13 @@
 <?php
 
-if (isset($_POST['create_post']) && $_SESSION['user_role'] === 'admin' && isset($_POST['post_title']) && isset($_POST['post_category_id']) && isset($_POST['post_author']) && isset($_POST['post_tags']) && isset($_POST['post_content'])) {
+if (isset($_POST['create_post']) && $_SESSION['user_role'] && isset($_POST['post_title']) && isset($_POST['post_category_id']) && (isset($_POST['post_author']) || checkAdmin() === 'subscriber') && isset($_POST['post_tags']) && isset($_POST['post_content'])) {
     $post_title = $_POST['post_title'];
     $post_category_id = $_POST['post_category_id'];
-    $post_author = $_POST['post_author'];
+    if (checkAdmin() === 'subscriber') {
+        $post_author = $_SESSION['first_name'] . " " . $_SESSION['last_name'];
+    } else {
+        $post_author = $_POST['post_author'];
+    }
     $post_status = $_POST['post_status'];
     $post_img = $_FILES['post_img']['name'];
     $post_img_temp = $_FILES['post_img']['tmp_name'];
@@ -52,18 +56,20 @@ if (isset($_POST['create_post']) && $_SESSION['user_role'] === 'admin' && isset(
             <?php } ?>
         </select>
     </div>
-    <div class="form-group">
-        <label for="post_author">Post Author</label><br>
-        <select name="post_author" id="post_author" class="form-control">
-            <option value="">Select Author</option>
-            <?php
-            foreach ($userData as $userDataRow) {
-                $name = $userDataRow['first_name'] . " " . $userDataRow['last_name'];
-                echo '<option value="' . $userDataRow['user_id'] . '">' . $name . '</option>';
-            }
-            ?>
-        </select>
-    </div>
+    <?php if (isAdmin()) { ?>
+        <div class="form-group">
+            <label for="post_author">Post Author</label><br>
+            <select name="post_author" id="post_author" class="form-control">
+                <option value="">Select Author</option>
+                <?php
+                foreach ($userData as $userDataRow) {
+                    $name = $userDataRow['first_name'] . " " . $userDataRow['last_name'];
+                    echo '<option value="' . $userDataRow['user_id'] . '">' . $name . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+    <?php } ?>
     <div class="form-group">
         <label for="post_status">Post Status</label><br>
         <select name="post_status" id="post_status" class="form-control">

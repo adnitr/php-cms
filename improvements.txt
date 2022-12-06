@@ -1,0 +1,19 @@
+1. Refactor the codes so as to give minimal error on the screen if user tries to mislead.
+2. Add feature to edit the comment.
+3. Functions reduction.
+4. Registration and Login function.
+6. Adding more validations to username, email, password .
+7. Giving specific error messages and separate functions for errorAlert and successAlert.
+8. Change alerts to dismissable alerts + add icons in alert to be more interactive.
+9. Delete, approave and unapproave users/similar things, link remaining in address bar fix.
+10. Notifications placing in correct place.
+11. Only erase the fields which is/are incorrect. set autocomplete on in the fields where they are required.
+12. Send delete requests via post.
+13. Use pretty urls and replace all links and paths.
+14. Use message feature so that admins(or any user) can send message to an author. Reflect it in the inbox of the user.
+15. Add category feature for the user. (Display top categories in the navbar)
+16. Use more advanced SQL queries instead of multiple simple queries.
+17. Promote most viewed post to the top.
+18. Display number of comments and likes to each post in index page.
+19. Improve the UI of the app.
+20. Use pagination in the admin area. Also display post content, comment content to the admin via the modal which is triggered by a button present in the table.

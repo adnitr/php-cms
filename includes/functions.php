@@ -331,10 +331,10 @@ function decrementCommentCount($connection, $postId)
 //     return $noOfComments;
 // }
 
-function addComment($connection, $postId, $commentAuthor, $commentEmail, $commentContent)
+function addComment($connection, $postId, $commentAuthor, $commentEmail, $commentContent, $commentAuthorId)
 {
     $commentContent = mysqli_real_escape_string($connection, $commentContent);
-    $query = "INSERT INTO comments(comment_post_id, comment_author, comment_email, comment_content, comment_status, comment_date) VALUES ('{$postId}', '{$commentAuthor}', '{$commentEmail}', '{$commentContent}', 'unapproaved', now())";
+    $query = "INSERT INTO comments(comment_post_id, comment_author, comment_email, comment_content, comment_status, comment_date, comment_author_id) VALUES ('{$postId}', '{$commentAuthor}', '{$commentEmail}', '{$commentContent}', 'unapproaved', now(), '{$commentAuthorId}')";
 
     $status = mysqli_query($connection, $query);
     increaseCommentCount($connection, $postId);
@@ -581,6 +581,12 @@ function checkAdmin()
     }
 }
 
+function isAdmin()
+{
+    global $_SESSION;
+    return (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin');
+}
+
 function redirect($location)
 {
     header("Location: " . $location);
@@ -600,4 +606,177 @@ function isLoggedIn()
     global $_SESSION;
     if (isset($_SESSION['user_id'])) return true;
     return false;
+}
+
+
+function isLiked($connection, $postId)
+{
+    $is_logged_in = isLoggedIn();
+    if ($is_logged_in) {
+        //find if the user has liked the post
+        global $_SESSION;
+        $user_id = $_SESSION['user_id'];
+        $query = "SELECT * FROM likes WHERE user_id = '$user_id' AND post_id = '$postId'";
+        $data = mysqli_query($connection, $query);
+        $countRows = mysqli_num_rows($data);
+        if ($countRows) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+function getPostLikes($post_id)
+{
+    global $connection;
+    $query = "SELECT post_likes FROM posts WHERE post_id = '$post_id'";
+    $data = mysqli_query($connection, $query);
+    $data = mysqli_fetch_assoc($data);
+    return $data['post_likes'];
+}
+
+function isAuthorOfPost($post_id)
+{
+    if (isset($_SESSION['user_role'])) {
+        if ($_SESSION['user_role']) {
+            global $connection;
+            $user_id = $_SESSION['user_id'];
+            $query = "SELECT * FROM posts WHERE post_id = '$post_id'";
+            $data = mysqli_query($connection, $query);
+            $row = mysqli_fetch_assoc($data);
+            if ($row['post_author'] == $user_id) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+function isAuthorPost($postId)
+{
+    global $connection;
+    $user_id = $_SESSION['user_id'];
+    $query = "SELECT * FROM posts WHERE post_id = '$postId' AND post_author = '$user_id'";
+    $result = mysqli_query($connection, $query);
+    $count = mysqli_num_rows($result);
+    if ($count) return true;
+    else return false;
+}
+
+function isCommentToAuthorPost($commentId)
+{
+    global $connection;
+    $query = "SELECT * FROM comments WHERE comment_id = $commentId";
+    $result = mysqli_query($connection, $query);
+    $row = mysqli_fetch_assoc($result);
+    $postId = $row['comment_post_id'];
+    return isAuthorPost($postId);
+}
+
+function countCommentAuthorPosts()
+{
+    global $connection;
+    $count = 0;
+    $query = "SELECT * FROM comments";
+    $result = mysqli_query($connection, $query);
+    while ($row = mysqli_fetch_assoc($result)) {
+        if (isAuthorPost($row['comment_post_id'])) {
+            $count++;
+        }
+    }
+    return $count;
+}
+
+function countAuthorPosts()
+{
+    global $connection;
+    $count = 0;
+    $query = "SELECT * FROM posts";
+    $result = mysqli_query($connection, $query);
+    while ($row = mysqli_fetch_assoc($result)) {
+        if (isAuthorPost($row['post_id'])) {
+            $count++;
+        }
+    }
+    return $count;
+}
+
+function countAuthorDraftPosts()
+{
+    global $connection;
+    $count = 0;
+    $query = "SELECT * FROM posts WHERE post_status = 'draft'";
+    $result = mysqli_query($connection, $query);
+    while ($row = mysqli_fetch_assoc($result)) {
+        if (isAuthorPost($row['post_id'])) {
+            $count++;
+        }
+    }
+    return $count;
+}
+
+function countAuthorUnapprComments()
+{
+    global $connection;
+    $count = 0;
+
+    $query = "SELECT * FROM comments WHERE comment_status = 'unapproaved'";
+    $result = mysqli_query($connection, $query);
+    while ($row = mysqli_fetch_assoc($result)) {
+        if (isAuthorPost($row['comment_post_id'])) {
+            $count++;
+        }
+    }
+    return $count;
+}
+
+function isAlreadyCommented($postId)
+{
+    global $connection;
+    $user_id = $_SESSION['user_id'];
+    $query = "SELECT * FROM comments WHERE comment_post_id = '$postId' AND comment_author_id = '$user_id'";
+    $result = mysqli_query($connection, $query);
+    $numRows = mysqli_num_rows($result);
+    if ($numRows) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function getMyComments()
+{
+    global $connection;
+
+    $user_id = $_SESSION['user_id'];
+
+    $query = "SELECT * FROM comments WHERE comment_author_id = '$user_id'";
+    $result = mysqli_query($connection, $query);
+
+    return generateArray($result);
+}
+
+function isMyComment($commentId)
+{
+    global $connection;
+
+    $user_id = $_SESSION['user_id'];
+
+    $query = "SELECT * FROM comments WHERE comment_author_id = '$user_id' AND comment_id = '$commentId'";
+    $result = mysqli_query($connection, $query);
+    $numRows = mysqli_num_rows($result);
+
+    if ($numRows) {
+        return true;
+    } else {
+        return false;
+    }
 }

@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
     }
 }
 
-if (isset($_POST['edit_user_individual']) && $_SESSION['user_role'] === 'admin' && isset($_POST['username']) && isset($_POST['email']) && isset($_POST['first_name']) && isset($_POST['last_name'])) {
+if (isset($_POST['edit_user_individual']) && $_SESSION['user_role'] && isset($_POST['username']) && isset($_POST['email']) && isset($_POST['first_name']) && isset($_POST['last_name'])) {
     $user_id = $_SESSION['user_id'];
     $username = $_POST['username'];
     $email = $_POST['email'];

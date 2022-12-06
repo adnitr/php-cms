@@ -4,6 +4,10 @@
 $catData = readTable($connection, "categories");
 $deleteSt = [];
 $editSt = [];
+
+if (!isAdmin()) {
+    redirect("index.php");
+}
 ?>
 
 <?php

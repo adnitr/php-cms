@@ -6,7 +6,12 @@ if (isset($_GET['edit'])) {
     $editRow = getRowById($connection, "posts", "post_id", $editId);
 }
 
-if (isset($_POST['post_id']) && $_SESSION['user_role'] === 'admin' && isset($_POST['edit_post']) && isset($_POST['post_title']) && isset($_POST['post_category_id']) && isset($_POST['post_author']) && isset($_POST['post_tags']) && isset($_POST['post_content'])) {
+if (!isAuthorOfPost($editId)) {
+    redirect("../index.php");
+    return;
+}
+
+if (isset($_POST['post_id']) && $_SESSION['user_role'] && isset($_POST['edit_post']) && isset($_POST['post_title']) && isset($_POST['post_category_id']) && isset($_POST['post_author']) && isset($_POST['post_tags']) && isset($_POST['post_content'])) {
     $post_id = $_POST['post_id'];
     $post_title = $_POST['post_title'];
     $post_category_id = $_POST['post_category_id'];
@@ -36,12 +41,14 @@ if (isset($_POST['post_id']) && $_SESSION['user_role'] === 'admin' && isset($_PO
         $editPostData['post_tags'] = $post_tags;
         $editPostData['post_content'] = $post_content;
         $editPostData['post_date'] = $post_date;
-        $editStatus = editPost($connection, $post_id, $editPostData);
-        if ($editStatus) {
-            displayAlert("success", "Post Edited Successfully!");
-            $editRow = getRowById($connection, "posts", "post_id", $editId);
-        } else {
-            displayAlert("danger", "Something went wrong, post could not be edited!");
+        if (isAuthorOfPost($editId)) {
+            $editStatus = editPost($connection, $post_id, $editPostData);
+            if ($editStatus) {
+                displayAlert("success", "Post Edited Successfully!");
+                $editRow = getRowById($connection, "posts", "post_id", $editId);
+            } else {
+                displayAlert("danger", "Something went wrong, post could not be edited!");
+            }
         }
     }
 }

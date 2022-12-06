@@ -41,10 +41,8 @@ $pageName = basename($_SERVER['PHP_SELF']);
                     echo '<li><a href="contact.php">Contact</a></li>';
                 }
 
-                if ($user_role_session == 'admin') {
+                if ($user_role_session == 'admin' || $user_role_session == 'subscriber') {
                     echo '<li><a href="admin">Admin</a></li>';
-                    echo '<li><a href="includes/logout.php">Logout</a></li>';
-                } else if ($user_role_session === 'subscriber') {
                     echo '<li><a href="includes/logout.php">Logout</a></li>';
                 } else {
                     if ($pageName === 'registration.php') {
@@ -54,17 +52,11 @@ $pageName = basename($_SERVER['PHP_SELF']);
                     }
                     echo '<li><a href="login.php">Login</a></li>';
                 }
-
                 ?>
 
-
-
-
-
-
                 <?php
-                if (isset($_SESSION['user_role'])) {
-                    if ($_SESSION['user_role'] === 'admin') {
+                if (isset($_SESSION['user_role']) && isset($_GET['p-id'])) {
+                    if ($_SESSION['user_role'] === 'admin' || ($_SESSION['user_role'] && isAuthorPost($_GET['p-id']))) {
                         if (isset($_GET['p-id'])) {
                             echo '<li><a href="admin/posts.php?source=edit_post&edit=' . $_GET['p-id'] . '">Edit Post</a></li>';
                         }

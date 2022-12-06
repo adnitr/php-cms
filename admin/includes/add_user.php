@@ -28,15 +28,11 @@ if (isset($_POST['create_user']) && $_SESSION['user_role'] === 'admin' && isset(
             if (isDuplicate($connection, "users", "email", $email)) {
                 displayAlert("danger", "Email already exists");
             } else {
-                if (isDuplicate($connection, "users", "username", $username)) {
-                    displayAlert("danger", "Email already exists");
+                $createStatus = createUser($connection, $createUserData);
+                if ($createStatus) {
+                    displayAlert("success", "User Added Successfully!");
                 } else {
-                    $createStatus = createUser($connection, $createUserData);
-                    if ($createStatus) {
-                        displayAlert("success", "User Added Successfully!");
-                    } else {
-                        displayAlert("danger", "Something went wrong, user could not be added!");
-                    }
+                    displayAlert("danger", "Something went wrong, user could not be added!");
                 }
             }
         }
