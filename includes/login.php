@@ -8,7 +8,8 @@ if (isset($_POST['login_submit']) && isset($_POST['username']) && isset($_POST['
     $password = $_POST['password'];
     if (checkEmpty($username) && checkEmpty(($password))) {
         // displayAlert("danger", "Username and Password fields are required!");
-        header("Location: ../index.php");
+        // header("Location: ../index.php");
+        return false;
     } else {
         $username = mysqli_real_escape_string($connection, $username);
         $password = mysqli_real_escape_string($connection, $password);
@@ -18,8 +19,8 @@ if (isset($_POST['login_submit']) && isset($_POST['username']) && isset($_POST['
         $status = mysqli_fetch_assoc($status);
 
         if (!$status) {
-            // displayAlert("danger", "user not found!");
-            header("Location: ../index.php");
+            return displayAlert("danger", "user not found!");
+            // header("Location: ../index.php");
         } else {
             if (password_verify($password, $status['password'])) {
                 $_SESSION['username'] = $status['username'];

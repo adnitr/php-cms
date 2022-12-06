@@ -55,6 +55,9 @@
                         <input class="btn btn-primary" type="submit" name="login_submit" value="Login">
                     </span>
                 </div>
+                <div class="form-group">
+                    <a href="forgot.php?forgot=<?php echo uniqid(true); ?>">Forgot Password?</a>
+                </div>
             </form>
         <?php } else { ?>
             <h4>Loggged in as <?php echo $_SESSION['username']; ?></h4>

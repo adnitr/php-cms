@@ -37,10 +37,14 @@ $val = ($pageNo - 1) * $noOfPostsPerPage;
 //check user_role and find the noOfPages(noOfPosts/5) to be displayed
 if ($user_role === 'admin') {
     $noOfPages = ceil(countRowsCondition($connection, "posts", array("post_author" => $author)) / 5);
-    $posts = readTableMultipleConditionLimited($connection, "posts", $val, 5, array("post_author" => $author));
+    $query = "SELECT * FROM posts WHERE post_author = $author LIMIT $val, $noOfPostsPerPage";
+    $data = mysqli_query($connection, $query);
+    $posts = generateArray($data);
 } else {
     $noOfPages = ceil(countRowsCondition($connection, "posts", array("post_author" => $author, "post_status" => "published")) / 5);
-    $posts = readTableMultipleConditionLimited($connection, "posts", $val, 5, array("post_author" => $author, "post_status" => "published"));
+    $query = "SELECT * FROM posts WHERE post_author = $author AND post_status = 'published' LIMIT $val, $noOfPostsPerPage";
+    $data = mysqli_query($connection, $query);
+    $posts = generateArray($data);
 }
 ?>
 

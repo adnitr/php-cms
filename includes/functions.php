@@ -25,85 +25,9 @@ function generate1DArray($mysqliObject)
     return $row;
 }
 
-function readTableAdvanced($connection, $tableName, $object)
-{
-    $query = "SELECT * FROM $tableName";
-    $retarr = [];
-    $data = mysqli_query($connection, $query);
-    while ($row = mysqli_fetch_assoc($data)) {
-        array_push($retarr, $row);
-    }
-    return $retarr;
-}
-
-function readTableLeftJoin($connection, $tableName, $tableToJoin, $joinCondition)
-{
-    $query = "SELECT * FROM $tableName LEFT JOIN ($tableToJoin) ON $joinCondition";
-    $retarr = [];
-    $data = mysqli_query($connection, $query);
-    while ($row = mysqli_fetch_assoc($data)) {
-        array_push($retarr, $row);
-    }
-    return $retarr;
-}
-
-function readTableLeftJoinLimited($connection, $tableName, $tableToJoin, $joinCondition, $val1, $val2)
-{
-    $query = "SELECT * FROM $tableName LEFT JOIN ($tableToJoin) ON $joinCondition LIMIT $val1, $val2";
-    $retarr = [];
-    $data = mysqli_query($connection, $query);
-    while ($row = mysqli_fetch_assoc($data)) {
-        array_push($retarr, $row);
-    }
-    return $retarr;
-}
-
 function readTableCondition($connection, $tableName, $condition)
 {
     $query = "SELECT * FROM $tableName WHERE $condition";
-    $retarr = [];
-    $data = mysqli_query($connection, $query);
-    while ($row = mysqli_fetch_assoc($data)) {
-        array_push($retarr, $row);
-    }
-    return $retarr;
-}
-
-function readTableLimited($connection, $tableName, $val1, $val2)
-{
-    $query = "SELECT * FROM $tableName LIMIT $val1, $val2";
-    $retarr = [];
-    $data = mysqli_query($connection, $query);
-    while ($row = mysqli_fetch_assoc($data)) {
-        array_push($retarr, $row);
-    }
-    return $retarr;
-}
-
-function readTableConditionLimited($connection, $tableName, $colName, $colVal, $val1, $val2)
-{
-    $query = "SELECT * FROM $tableName WHERE $colName = '$colVal' LIMIT $val1, $val2";
-    $retarr = [];
-    $data = mysqli_query($connection, $query);
-    while ($row = mysqli_fetch_assoc($data)) {
-        array_push($retarr, $row);
-    }
-    return $retarr;
-}
-
-function readTableMultipleConditionLimited($connection, $tableName, $limitVal1, $limitVal2, $conditionValArr)
-{
-    $query = "SELECT * FROM $tableName WHERE ";
-    $arrlen = count($conditionValArr);
-    $count = 0;
-    foreach ($conditionValArr as $key => $val) {
-        if ($count !== $arrlen - 1) {
-            $query .= "$key = '$val' AND ";
-        } else {
-            $query .= "$key = '$val' LIMIT $limitVal1, $limitVal2";
-        }
-        $count++;
-    }
     $retarr = [];
     $data = mysqli_query($connection, $query);
     while ($row = mysqli_fetch_assoc($data)) {
@@ -135,7 +59,6 @@ function countRowsCondition($connection, $tableName, $conditionValArr)
 
 function hashPassword($pass)
 {
-    // return crypt($pass, '$2y$10$iusesomecrazystrings22$');
     return password_hash($pass, PASSWORD_BCRYPT, array('cost' => 12));
 }
 
@@ -182,7 +105,7 @@ function deletePost($connection, $id)
 
 function getRowById($connection, $tableName, $idName, $idVal)
 {
-    $query = "SELECT * FROM $tableName WHERE $idName = $idVal";
+    $query = "SELECT * FROM $tableName WHERE $idName = '$idVal'";
     $data = mysqli_query($connection, $query);
     $row = mysqli_fetch_assoc($data);
     return $row;
@@ -656,4 +579,25 @@ function checkAdmin()
     } else {
         return null;
     }
+}
+
+function redirect($location)
+{
+    header("Location: " . $location);
+    exit;
+}
+
+function isGivenMethod($method = null)
+{
+    if ($_SERVER['REQUEST_METHOD'] === strtoupper($method)) {
+        return true;
+    }
+    return false;
+}
+
+function isLoggedIn()
+{
+    global $_SESSION;
+    if (isset($_SESSION['user_id'])) return true;
+    return false;
 }

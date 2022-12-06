@@ -36,12 +36,16 @@ if (isset($_POST['edit_user']) && $_SESSION['user_role'] === 'admin' && isset($_
             if (isDuplicate($connection, "users", "email", $email)) {
                 displayAlert("danger", "Email already exists");
             } else {
-                $editStatus = editUser($connection, $editUserData);
-                if ($editStatus) {
-                    displayAlert("success", "User Edited Successfully! <a href='users.php'>View all users<a>");
-                    $editRow = getRowById($connection, "users", "user_id", $editId);
+                if (isDuplicate($connection, "users", "username", $username)) {
+                    displayAlert("danger", "Email already exists");
                 } else {
-                    displayAlert("danger", "Something went wrong, user could not be edited!");
+                    $editStatus = editUser($connection, $editUserData);
+                    if ($editStatus) {
+                        displayAlert("success", "User Edited Successfully! <a href='users.php'>View all users<a>");
+                        $editRow = getRowById($connection, "users", "user_id", $editId);
+                    } else {
+                        displayAlert("danger", "Something went wrong, user could not be edited!");
+                    }
                 }
             }
         }

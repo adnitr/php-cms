@@ -4,6 +4,7 @@
 <?php include "includes/functions.php" ?>
 
 <?php
+$user_role_session = checkAdmin();
 $categories = readTable($connection, "categories");
 
 $pageName = basename($_SERVER['PHP_SELF']);
@@ -34,19 +35,32 @@ $pageName = basename($_SERVER['PHP_SELF']);
                     }
                 }
 
-                if ($pageName === 'registration.php') {
-                    echo '<li><a href="contact.php">Contact</a></li>
-                    <li class="active"><a href="registration.php">Register</a></li>';
-                } else if ($pageName === 'contact.php') {
-                    echo '<li class="active"><a href="contact.php">Contact</a></li>
-                    <li><a href="registration.php">Register</a></li>';
+                if ($pageName === 'contact.php') {
+                    echo '<li class="active"><a href="contact.php">Contact</a></li>';
                 } else {
-                    echo '<li><a href="contact.php">Contact</a></li>
-                    <li><a href="registration.php">Register</a></li>';
+                    echo '<li><a href="contact.php">Contact</a></li>';
                 }
+
+                if ($user_role_session == 'admin') {
+                    echo '<li><a href="admin">Admin</a></li>';
+                    echo '<li><a href="includes/logout.php">Logout</a></li>';
+                } else if ($user_role_session === 'subscriber') {
+                    echo '<li><a href="includes/logout.php">Logout</a></li>';
+                } else {
+                    if ($pageName === 'registration.php') {
+                        echo '<li class="active"><a href="registration.php">Register</a></li>';
+                    } else {
+                        echo '<li><a href="registration.php">Register</a></li>';
+                    }
+                    echo '<li><a href="login.php">Login</a></li>';
+                }
+
                 ?>
 
-                <li><a href="admin">Admin</a></li>
+
+
+
+
 
                 <?php
                 if (isset($_SESSION['user_role'])) {
